@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Paint-The-Shed")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7baea9832ee3cc644d2d262ab47c0e2af1210195")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1a23496f7cf75bbb10325cf81226ae1006ab256f")]
 [assembly: System.Reflection.AssemblyProductAttribute("Paint-The-Shed")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Paint-The-Shed")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

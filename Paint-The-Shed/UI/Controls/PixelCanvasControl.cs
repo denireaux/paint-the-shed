@@ -31,8 +31,11 @@ public sealed class PixelCanvasControl : Control
     private BitmapPresenter? _presenter;
 
     private bool _isDrawing;
+
+    // NOTE: The below will set the brush radius and brush color.
+    // TODO: Will ultimately need to make this changeable from the desktop application.
     private int _brushRadius = 6;
-    private int _brushColor = unchecked((int)0xFF000000); // black
+    private int _brushColor = unchecked((int)0xFF000000);
 
     public PixelCanvasControl()
     {
@@ -53,7 +56,7 @@ public sealed class PixelCanvasControl : Control
     {
         if (_buffer != null && _presenter != null) return;
 
-        _buffer = new PixelBuffer(CanvasWidth, CanvasHeight, unchecked((int)0xFFFFFFFF)); // white
+        _buffer = new PixelBuffer(CanvasWidth, CanvasHeight, unchecked((int)0xFFFFFFFF));
         _presenter = new BitmapPresenter(CanvasWidth, CanvasHeight);
 
         _presenter.BlitFromArgb(_buffer.Pixels);
