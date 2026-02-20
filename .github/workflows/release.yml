@@ -3,7 +3,7 @@ name: Build & Release
 on:
   push:
     tags:
-      - "v*.*.*"   # e.g. v0.1.0
+      - "v*.*.*"     # e.g. v0.1.0
   workflow_dispatch:
 
 env:
@@ -63,7 +63,6 @@ jobs:
             -p:PublishSingleFile=true \
             -o artifacts/osx-x64/publish
 
-      # Build a minimal .app bundle per Avalonia macOS deployment guidance :contentReference[oaicite:0]{index=0}
       - name: Create .app bundle
         run: |
           set -euo pipefail
@@ -73,25 +72,22 @@ jobs:
           BUNDLE="$OUT/${APP}.app"
           CONTENTS="$BUNDLE/Contents"
           MACOS="$CONTENTS/MacOS"
-          RES="$CONTENTS/Resources"
 
-          mkdir -p "$MACOS" "$RES"
+          mkdir -p "$MACOS"
 
-          # Copy published files into the MacOS folder
           cp -R "$PUBLISH/"* "$MACOS/"
 
-          # Create a basic Info.plist (good enough to run; refine later)
-          cat > "$CONTENTS/Info.plist" << 'PLIST'
+          cat > "$CONTENTS/Info.plist" << PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
-              <key>CFBundleDisplayName</key><string>Paint_The_Shed</string>
-              <key>CFBundleName</key><string>Paint_The_Shed</string>
+              <key>CFBundleDisplayName</key><string>${APP}</string>
+              <key>CFBundleName</key><string>${APP}</string>
               <key>CFBundleIdentifier</key><string>com.example.painttheshed</string>
               <key>CFBundleVersion</key><string>1.0.0</string>
               <key>CFBundleShortVersionString</key><string>1.0.0</string>
-              <key>CFBundleExecutable</key><string>Paint_The_Shed</string>
+              <key>CFBundleExecutable</key><string>${APP}</string>
               <key>CFBundlePackageType</key><string>APPL</string>
               <key>LSMinimumSystemVersion</key><string>11.0</string>
           </dict>
@@ -100,7 +96,6 @@ jobs:
 
           chmod +x "$MACOS/${APP}" || true
 
-          # Zip the .app
           (cd "$OUT" && ditto -c -k --sequesterRsrc --keepParent "${APP}.app" "${APP}-osx-x64.zip")
 
       - name: Upload artifact
@@ -129,7 +124,6 @@ jobs:
             -p:IncludeNativeLibrariesForSelfExtract=true \
             -o artifacts/linux-x64/publish
 
-      # Build an AppDir + AppImage using appimagetool :contentReference[oaicite:1]{index=1}
       - name: Build AppImage
         run: |
           set -euo pipefail
@@ -141,7 +135,7 @@ jobs:
           mkdir -p "$APPDIR/usr/bin"
           cp -R "$PUBLISH/"* "$APPDIR/usr/bin/"
 
-          # Desktop entry
+          # Desktop file
           mkdir -p "$APPDIR/usr/share/applications"
           cat > "$APPDIR/usr/share/applications/${APP}.desktop" <<DESKTOP
           [Desktop Entry]
@@ -153,22 +147,21 @@ jobs:
           Terminal=false
           DESKTOP
 
-          # Minimal icon (placeholder). Replace with your real PNG later.
-          mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
-          convert -size 256x256 xc:white "$APPDIR/usr/share/icons/hicolor/256x256/apps/${APP}.png" 2>/dev/null || true
-
-          # AppRun
-          cat > "$APPDIR/AppRun" <<'APPRUN'
+          # AppRun (entrypoint)
+          cat > "$APPDIR/AppRun" <<APPRUN
           #!/bin/sh
-          HERE="$(dirname "$(readlink -f "$0")")"
-          exec "$HERE/usr/bin/Paint_The_Shed" "$@"
+          HERE="\$(dirname "\$(readlink -f "\$0")")"
+          exec "\$HERE/usr/bin/${APP}" "\$@"
           APPRUN
           chmod +x "$APPDIR/AppRun"
 
-          # Fetch appimagetool and build AppImage
+          # Icon placeholder (replace later with your PNG)
+          mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
+          printf '' > "$APPDIR/usr/share/icons/hicolor/256x256/apps/${APP}.png"
+
+          # Build AppImage
           wget -q https://github.com/AppImage/appimagetool/releases/latest/download/appimagetool-x86_64.AppImage -O appimagetool
           chmod +x appimagetool
-
           ./appimagetool "$APPDIR" "$OUT/${APP}-linux-x64.AppImage"
 
       - name: Upload artifact

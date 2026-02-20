@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AssemblyName>Paint_The_Shed</AssemblyName>
+    <RootNamespace>Paint_The_Shed</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
