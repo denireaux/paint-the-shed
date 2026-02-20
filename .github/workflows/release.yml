@@ -34,9 +34,12 @@ jobs:
           -o artifacts/win-x64
 
       - name: Zip
+        shell: pwsh
         run: |
-          powershell -NoProfile -Command ^
-            "Compress-Archive -Path artifacts/win-x64/* -DestinationPath artifacts/${{ env.APP_NAME }}-win-x64.zip -Force"
+          $src = "artifacts/win-x64"
+          $zip = "artifacts/${{ env.APP_NAME }}-win-x64.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path (Join-Path $src "*") -DestinationPath $zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -135,9 +138,8 @@ jobs:
           mkdir -p "$APPDIR/usr/bin"
           cp -R "$PUBLISH/"* "$APPDIR/usr/bin/"
 
-          # Desktop file
-          mkdir -p "$APPDIR/usr/share/applications"
-          cat > "$APPDIR/usr/share/applications/${APP}.desktop" <<DESKTOP
+          # Desktop file (must be in AppDir root for appimagetool)
+          cat > "$APPDIR/${APP}.desktop" <<DESKTOP
           [Desktop Entry]
           Name=${APP}
           Exec=${APP}
@@ -155,9 +157,8 @@ jobs:
           APPRUN
           chmod +x "$APPDIR/AppRun"
 
-          # Icon placeholder (replace later with your PNG)
-          mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
-          printf '' > "$APPDIR/usr/share/icons/hicolor/256x256/apps/${APP}.png"
+          # Icon placeholder (root icon is commonly expected)
+          printf '' > "$APPDIR/${APP}.png"
 
           # Build AppImage
           wget -q https://github.com/AppImage/appimagetool/releases/latest/download/appimagetool-x86_64.AppImage -O appimagetool
