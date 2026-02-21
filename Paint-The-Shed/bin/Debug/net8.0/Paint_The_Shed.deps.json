@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v8.0": {
-      "Paint-The-Shed/1.0.0": {
+      "Paint_The_Shed/0.1.0": {
         "dependencies": {
           "Avalonia": "11.3.12",
           "Avalonia.Desktop": "11.3.12",
@@ -15,7 +15,7 @@
           "Avalonia.Themes.Fluent": "11.3.12"
         },
         "runtime": {
-          "Paint-The-Shed.dll": {}
+          "Paint_The_Shed.dll": {}
         }
       },
       "Avalonia/11.3.12": {
@@ -446,7 +446,7 @@
     }
   },
   "libraries": {
-    "Paint-The-Shed/1.0.0": {
+    "Paint_The_Shed/0.1.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

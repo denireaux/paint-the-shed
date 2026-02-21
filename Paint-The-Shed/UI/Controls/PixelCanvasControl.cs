@@ -34,7 +34,7 @@ public sealed class PixelCanvasControl : Control
 
     // NOTE: The below will set the brush radius and brush color.
     // TODO: Will ultimately need to make this changeable from the desktop application.
-    private int _brushRadius = 6;
+    private int _brushRadius = 3;
     private int _brushColor = unchecked((int)0xFF000000);
 
     public PixelCanvasControl()
