@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Paint_The_Shed.UI.Views.PaletteWindow"
+        Width="260"
+        Height="220"
+        CanResize="False"
+        Title="Palette">
+
+  <StackPanel Margin="12" Spacing="10">
+
+    <TextBlock Text="Current marker color" FontSize="14"/>
+
+    <!-- Preview -->
+    <Border x:Name="Preview"
+            Height="40"
+            CornerRadius="6"
+            BorderBrush="Gray"
+            BorderThickness="1"/>
+
+    <TextBlock Text="Quick swatches" FontSize="14"/>
+
+    <!-- WrapPanel has no Spacing; use Margin on buttons -->
+    <WrapPanel x:Name="Swatches">
+
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FF000000" Click="Swatch_Click"/>
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FFFF0000" Click="Swatch_Click"/>
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FF00FF00" Click="Swatch_Click"/>
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FF0000FF" Click="Swatch_Click"/>
+
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FFFFFF00" Click="Swatch_Click"/>
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FFFF00FF" Click="Swatch_Click"/>
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FF00FFFF" Click="Swatch_Click"/>
+      <Button Width="34" Height="34" Margin="0,0,8,8" Tag="#FFFFFFFF" Click="Swatch_Click"/>
+
+    </WrapPanel>
+
+  </StackPanel>
+</Window>
