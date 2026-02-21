@@ -1,0 +1,190 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+        - "**"
+    tags:
+      - "v*.*.*"     # e.g. v0.1.0
+  workflow_dispatch:
+
+env:
+  PROJECT_PATH: Paint-The-Shed/Paint-The-Shed.csproj
+  APP_NAME: Paint_The_Shed
+  CONFIGURATION: Release
+  DOTNET_VERSION: "8.0.x"
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish (win-x64)
+        run: >
+          dotnet publish ${{ env.PROJECT_PATH }}
+          -c ${{ env.CONFIGURATION }}
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o artifacts/win-x64
+
+      - name: Zip
+        shell: pwsh
+        run: |
+          $src = "artifacts/win-x64"
+          $zip = "artifacts/${{ env.APP_NAME }}-win-x64.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path (Join-Path $src "*") -DestinationPath $zip -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-x64
+          path: artifacts/${{ env.APP_NAME }}-win-x64.zip
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish (osx-x64)
+        run: |
+          dotnet publish "${{ env.PROJECT_PATH }}" \
+            -c "${{ env.CONFIGURATION }}" \
+            -r osx-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -o artifacts/osx-x64/publish
+
+      - name: Create .app bundle
+        run: |
+          set -euo pipefail
+          APP="${{ env.APP_NAME }}"
+          OUT="artifacts/osx-x64"
+          PUBLISH="$OUT/publish"
+          BUNDLE="$OUT/${APP}.app"
+          CONTENTS="$BUNDLE/Contents"
+          MACOS="$CONTENTS/MacOS"
+
+          mkdir -p "$MACOS"
+
+          cp -R "$PUBLISH/"* "$MACOS/"
+
+          cat > "$CONTENTS/Info.plist" << PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleDisplayName</key><string>${APP}</string>
+              <key>CFBundleName</key><string>${APP}</string>
+              <key>CFBundleIdentifier</key><string>com.example.painttheshed</string>
+              <key>CFBundleVersion</key><string>1.0.0</string>
+              <key>CFBundleShortVersionString</key><string>1.0.0</string>
+              <key>CFBundleExecutable</key><string>${APP}</string>
+              <key>CFBundlePackageType</key><string>APPL</string>
+              <key>LSMinimumSystemVersion</key><string>11.0</string>
+          </dict>
+          </plist>
+          PLIST
+
+          chmod +x "$MACOS/${APP}" || true
+
+          (cd "$OUT" && ditto -c -k --sequesterRsrc --keepParent "${APP}.app" "${APP}-osx-x64.zip")
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: osx-x64
+          path: artifacts/osx-x64/${{ env.APP_NAME }}-osx-x64.zip
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish (linux-x64)
+        run: |
+          dotnet publish "${{ env.PROJECT_PATH }}" \
+            -c "${{ env.CONFIGURATION }}" \
+            -r linux-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -o artifacts/linux-x64/publish
+
+      - name: Build AppImage
+        run: |
+          set -euo pipefail
+          APP="${{ env.APP_NAME }}"
+          OUT="artifacts/linux-x64"
+          PUBLISH="$OUT/publish"
+          APPDIR="$OUT/${APP}.AppDir"
+
+          mkdir -p "$APPDIR/usr/bin"
+          cp -R "$PUBLISH/"* "$APPDIR/usr/bin/"
+
+          # Desktop file (must be in AppDir root for appimagetool)
+          cat > "$APPDIR/${APP}.desktop" <<DESKTOP
+          [Desktop Entry]
+          Name=${APP}
+          Exec=${APP}
+          Icon=${APP}
+          Type=Application
+          Categories=Graphics;
+          Terminal=false
+          DESKTOP
+
+          # AppRun (entrypoint)
+          cat > "$APPDIR/AppRun" <<APPRUN
+          #!/bin/sh
+          HERE="\$(dirname "\$(readlink -f "\$0")")"
+          exec "\$HERE/usr/bin/${APP}" "\$@"
+          APPRUN
+          chmod +x "$APPDIR/AppRun"
+
+          # Icon placeholder (root icon is commonly expected)
+          printf '' > "$APPDIR/${APP}.png"
+
+          # Build AppImage
+          wget -q https://github.com/AppImage/appimagetool/releases/latest/download/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          ./appimagetool "$APPDIR" "$OUT/${APP}-linux-x64.AppImage"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: artifacts/linux-x64/${{ env.APP_NAME }}-linux-x64.AppImage
+
+  release:
+    needs: [windows, macos, linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/*
