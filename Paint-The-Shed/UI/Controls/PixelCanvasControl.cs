@@ -27,6 +27,22 @@ public sealed class PixelCanvasControl : Control
         set => SetValue(CanvasHeightProperty, value);
     }
 
+    public int MarkerColorArgb
+    {
+        get => _brushColor;
+        set => _brushColor = value;
+    }
+
+    public static int ToArgb(Color c) =>
+        (c.A << 24) | (c.R << 16) | (c.G << 8) | c.B;
+
+    public static Color FromArgb(int argb) =>
+        Color.FromArgb(
+            (byte)((argb >> 24) & 0xFF),
+            (byte)((argb >> 16) & 0xFF),
+            (byte)((argb >> 8) & 0xFF),
+            (byte)(argb & 0xFF));
+
     private PixelBuffer? _buffer;
     private BitmapPresenter? _presenter;
 

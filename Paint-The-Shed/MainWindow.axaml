@@ -6,8 +6,21 @@
         Height="800"
         Title="Paint_The_Shed">
 
-    <Grid>
-        <controls:PixelCanvasControl />
-    </Grid>
+    <DockPanel>
+
+        <!-- Top toolbar -->
+        <Border DockPanel.Dock="Top"
+                Padding="8"
+                BorderBrush="#333"
+                BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="Palette" Click="OpenPalette_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Canvas fills remaining space -->
+        <controls:PixelCanvasControl x:Name="Canvas"/>
+
+    </DockPanel>
 
 </Window>

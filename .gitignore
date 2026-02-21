@@ -1,1 +1,19 @@
-/Paint-The-Shed/obj/Debug/*
+# .NET build outputs
+**/bin/
+**/obj/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+
+# User / OS junk
+*.user
+*.suo
+*.log
+.DS_Store
+Thumbs.db
+
+# Publish artifacts
+artifacts/
+Paint-The-Shed/obj/Debug/net8.0/Paint-The-Shed.AssemblyInfo.cs
+Paint-The-Shed/obj/Debug/net8.0/Paint-The-Shed.AssemblyInfoInputs.cache
