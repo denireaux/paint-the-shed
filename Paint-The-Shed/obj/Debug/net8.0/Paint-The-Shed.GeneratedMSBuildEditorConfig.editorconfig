@@ -24,3 +24,6 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/dange/projects/paint-the-shed/Paint-The-Shed/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/dange/projects/paint-the-shed/Paint-The-Shed/UI/Views/PaletteWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
