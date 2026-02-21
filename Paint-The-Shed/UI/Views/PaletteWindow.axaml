@@ -4,11 +4,11 @@
         Width="260"
         Height="220"
         CanResize="False"
-        Title="Palette">
+        Title="Color Palette">
 
   <StackPanel Margin="12" Spacing="10">
 
-    <TextBlock Text="Current marker color" FontSize="14"/>
+    <TextBlock Text="Current color" FontSize="14"/>
 
     <!-- Preview -->
     <Border x:Name="Preview"
